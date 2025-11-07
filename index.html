@@ -11,7 +11,7 @@
         body {
             font-family: 'Hiragino Sans', 'Meiryo', 'Yu Gothic', sans-serif;
             color: #000;
-            line-height: 1.6;
+            line-height: 1.5; /* 行間をわずかに詰める */
             background-color: #f7f7f7;
             min-height: 100vh;
         }
@@ -19,70 +19,73 @@
         /* 辞書カードの基本スタイル */
         .verb-card {
             background-color: #fff;
-            padding: 20px 30px;
-            margin-bottom: 30px;
+            padding: 20px 25px; /* パディングを少し減らす */
+            margin-bottom: 20px; /* マージンを減らす */
             border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
+            box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.04);
+            /* 2列表示のため最大幅の制限を解除 */
+            max-width: none; 
+            margin-left: 0;
+            margin-right: 0;
         }
 
         /* 1. ヘッダー (単語) */
         .card-header h3 {
-            font-size: 2.2em;
+            font-size: 2.0em; /* サイズをわずかに小さく */
             font-weight: 500;
-            margin: 0 0 5px 0;
+            margin: 0 0 3px 0;
             display: inline-block;
-            border-bottom: 2px solid #000; /* タイトルの下線 */
-            padding-bottom: 3px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 1px; /* パディングを減らす */
         }
         /* 派生情報 (接頭辞 + 基幹) */
         .etymology {
-            font-size: 1.1em;
-            color: #007bff; /* 青系の色 */
+            font-size: 1.0em; /* サイズをわずかに小さく */
+            color: #007bff; 
             font-style: italic;
-            margin-top: 5px;
+            margin-top: 3px; /* マージンを減らす */
             font-weight: 500;
         }
 
         /* 2. 意味 */
         .meaning-jp {
-            font-size: 1.4em;
+            font-size: 1.3em; /* サイズをわずかに小さく */
             font-weight: 700;
-            margin: 25px 0 3px 0;
+            margin: 20px 0 3px 0; /* マージンを減らす */
             color: #333;
         }
         .meaning-en {
             font-style: italic;
-            font-size: 1em;
+            font-size: 0.95em; /* サイズをわずかに小さく */
             color: #666;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
+            margin-bottom: 20px; /* マージンを減らす */
+            padding-bottom: 8px; /* パディングを減らす */
             border-bottom: 1px solid #eee;
         }
 
         /* 3. 詳細情報 */
         .detail-item {
             display: flex;
-            margin-bottom: 6px;
+            margin-bottom: 4px; /* マージンを減らす */
+            align-items: baseline;
         }
         .detail-label {
-            width: 100px; /* レイアウトを揃えるための固定幅 */
+            width: 80px; /* 固定幅を縮小 */
             font-weight: normal;
-            margin-right: 15px;
+            margin-right: 10px; /* マージンを減らす */
             color: #333;
             flex-shrink: 0;
+            font-size: 0.9em;
         }
         .detail-value {
             flex-grow: 1;
-            font-size: 0.95em;
+            font-size: 0.9em; /* サイズをわずかに小さく */
         }
         .german-term {
             font-family: 'Consolas', 'Courier New', monospace;
             font-style: italic;
             background-color: #fcfcfc;
-            padding: 1px 3px;
+            padding: 0 2px; /* パディングを減らす */
             border-radius: 3px;
         }
         .highlight-detail {
@@ -92,20 +95,20 @@
 
         /* 4. 例文 */
         .example-section {
-            margin-top: 30px;
+            margin-top: 20px; /* マージンを減らす */
             padding-top: 10px;
             border-top: 1px dashed #ddd;
         }
         .example-box {
             display: flex;
-            margin-bottom: 20px;
+            margin-bottom: 15px; /* マージンを減らす */
             align-items: flex-start;
         }
         .vertical-line {
-            border-left: 2px solid #007bff; /* 例文の左側の青い縦線 */
+            border-left: 2px solid #007bff;
             height: auto;
-            margin-right: 15px;
-            min-height: 2.5em; 
+            margin-right: 10px; /* マージンを減らす */
+            min-height: 2em; /* 最小高さを調整 */
             border-radius: 1px;
             flex-shrink: 0;
         }
@@ -115,10 +118,10 @@
         .german-sentence {
             font-weight: normal;
             margin: 0;
-            font-size: 1.05em;
+            font-size: 1.0em;
         }
         .japanese-translation {
-            font-size: 0.9em;
+            font-size: 0.85em; /* サイズをわずかに小さく */
             color: #555;
             margin: 0;
             line-height: 1.2;
@@ -127,39 +130,46 @@
 
         /* 5. 派生語/関連語 */
         .related-section {
-            margin-top: 25px;
+            margin-top: 15px; /* マージンを減らす */
             border-top: 1px solid #eee;
-            padding-top: 15px;
+            padding-top: 10px; /* パディングを減らす */
         }
         .related-item {
             display: flex;
             align-items: center;
-            margin-bottom: 5px;
-            font-size: 0.95em;
+            margin-bottom: 3px; /* マージンを減らす */
+            font-size: 0.9em; /* サイズをわずかに小さく */
         }
         .icon {
-            font-size: 1.3em;
+            font-size: 1.2em; /* サイズをわずかに小さく */
             color: #007bff;
-            margin-right: 8px;
+            margin-right: 6px;
             line-height: 1;
         }
 
-        /* フィルタリングリスト */
+        /* フィルタリングリスト - 横並びスタイルは維持 */
         .filter-list {
             list-style: none;
             padding: 0;
             margin: 0;
+            display: flex;          
+            flex-wrap: wrap;        
+            gap: 5px;               
         }
         .filter-list li {
-            padding: 2px 0;
+            padding: 0;
+            margin: 0;
+            display: inline-block;
         }
         .filter-list a {
-            display: block;
-            padding: 4px 10px;
+            display: inline-block;
+            padding: 3px 6px; /* パディングを調整 */
             border-radius: 4px;
             color: #333;
             text-decoration: none;
             transition: background-color 0.2s;
+            white-space: nowrap; 
+            font-size: 0.9em; /* 文字サイズをわずかに小さく */
         }
         .filter-list a:hover {
             background-color: #eef;
@@ -170,6 +180,19 @@
             font-weight: 700;
         }
         
+        /* スラッシュ区切りと「全て」の特殊対応 */
+        .filter-list li:not(.all-item):not(:last-child)::after {
+            content: "/";
+            margin-left: 5px;
+            margin-right: 5px;
+            color: #ccc;
+        }
+        .all-item a {
+            padding: 3px 8px;
+            margin-right: 8px;
+        }
+
+
         /* ローディング・エラーメッセージ */
         #main-content {
             min-height: 50vh;
@@ -185,8 +208,22 @@
                 border-bottom: 1px solid #ddd;
                 padding-bottom: 20px;
             }
+            /* タブレット以下では1列を維持 */
             .grid-cols-4 {
                 grid-template-columns: 1fr;
+            }
+        }
+        
+        /* メインコンテンツ - 2列表示のスタイル */
+        .verb-grid {
+            display: grid;
+            gap: 20px; /* カード間の間隔を調整 */
+        }
+        
+        /* デスクトップ (lg) 以上で2列表示 */
+        @media (min-width: 1024px) {
+            .verb-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
     </style>
@@ -222,33 +259,34 @@
         <!-- メインコンテンツ (単語詳細) -->
         <main id="main-content" class="lg:col-span-3">
             <h2 class="text-2xl font-semibold mb-6 text-gray-800">単語一覧（接頭辞：全て）</h2>
-            <div id="verb-details">
-                <p class="text-center text-gray-500 mt-10">データを読み込み中です...</p>
+            <div id="verb-details" class="verb-grid">
+                <p class="text-center text-gray-500 mt-10 col-span-full">データを読み込み中です...</p>
             </div>
         </main>
     </div>
 
     <script>
         // ----------------------------------------------------
-        // JavaScript ロジック (script.js の内容を統合)
+        // JavaScript ロジック (データの取得と表示)
         // ----------------------------------------------------
         
-        // GASのウェブアプリURLをここに設定
+        // **データソースURL**: GitHubのRawファイルURLを設定
         const JSON_URL = 'https://raw.githubusercontent.com/SallyYamamoto/Prefix_German/refs/heads/main/verbs.json';
         let allData = []; // 全データを保持するグローバル変数
 
         // データを取得し、整形する関数
         async function fetchData() {
             try {
-                // プロキシサービス (allorigins.win) を使ってCORSエラーを回避し、JSONデータを取得
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(JSON_URL)}`;
-                
-                const proxyResponse = await fetch(proxyUrl);
-                const data = await proxyResponse.json(); 
+                // GitHub Raw URLから静的なJSONファイルを直接取得します。（高速）
+                const response = await fetch(JSON_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTPエラー: ${response.status} - URLまたはファイル権限を確認してください`);
+                }
+                const data = await response.json(); 
                 
                 // JSONデータから必要な情報を抽出・マッピング
                 allData = data.map(item => ({
-                    // JSONのキー（item.単語など）は、スプレッドシートの1行目のヘッダーと完全に一致させる
+                    // JSONのキー（item.単語など）は、スプレッドシートの1行目のヘッダーと完全に一致させる必要があります。
                     word: item.単語,
                     meaning: item.意味,
                     stem: item.基幹,
@@ -270,8 +308,8 @@
                 initializePage();
 
             } catch (error) {
-                console.error("データの取得中にエラーが発生しました。外部プロキシまたはGASの設定を確認してください:", error);
-                document.getElementById('verb-details').innerHTML = '<p class="text-center text-red-600 mt-10">データの読み込みに失敗しました。GASのURL、権限、デプロイ状態を再度確認してください。</p>';
+                console.error("データの取得中にエラーが発生しました。JSONファイル名、パス、またはJSONの構造を確認してください:", error);
+                document.getElementById('verb-details').innerHTML = `<p class="text-center text-red-600 mt-10 col-span-full">データの読み込みに失敗しました。JSONファイル（verbs.json）のURL、または内部の日本語キー（例: item.単語）が正しいか確認してください。（${error.message}）</p>`;
             }
         }
 
@@ -293,15 +331,17 @@
             const listElement = document.getElementById(elementId);
             listElement.innerHTML = '';
             
-            // 全て表示リンクを追加
+            // 1. 全て表示リンクを追加 (all-itemクラスでスラッシュ区切りから除外)
             const allItem = document.createElement('li');
+            allItem.classList.add('all-item');
             const allText = type === 'prefix' ? '全ての接頭辞' : '全ての基幹';
             allItem.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="${type}" class="active">**${allText}**</a>`;
             allItem.querySelector('a').addEventListener('click', (e) => filterData(e, type));
             listElement.appendChild(allItem);
             
-            // 各接頭辞/基幹のリンクを追加
+            // 2. 各接頭辞/基幹のリンクを追加
             items.forEach(item => {
+                // itemがnullや空文字列、または純粋な空白のみの場合はスキップ
                 if (!item || String(item).trim().length === 0) return;
                 
                 const listItem = document.createElement('li');
@@ -323,10 +363,12 @@
                 filteredData = allData;
                 headingElement.textContent = `単語一覧（${type === 'prefix' ? '接頭辞' : '基幹'}：全て）`;
             } else if (type === 'prefix') {
-                filteredData = allData.filter(item => item.prefix === filterValue);
+                // フィルタリング時に、nullや空文字列のデータも除外して絞り込む
+                filteredData = allData.filter(item => item.prefix && item.prefix === filterValue);
                 headingElement.textContent = `単語一覧（接頭辞：${filterValue}）`;
             } else if (type === 'stem') {
-                filteredData = allData.filter(item => item.stem === filterValue);
+                // フィルタリング時に、nullや空文字列のデータも除外して絞り込む
+                filteredData = allData.filter(item => item.stem && item.stem === filterValue);
                 headingElement.textContent = `単語一覧（基幹：${filterValue}）`;
             }
             
@@ -343,7 +385,7 @@
             detailsElement.innerHTML = ''; 
             
             if (data.length === 0) {
-                detailsElement.innerHTML = '<p class="text-center text-gray-500 mt-10">該当する単語は見つかりませんでした。</p>';
+                detailsElement.innerHTML = '<p class="text-center text-gray-500 mt-10 col-span-full">該当する単語は見つかりませんでした。</p>';
                 return;
             }
 
