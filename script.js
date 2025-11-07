@@ -28,19 +28,36 @@ async function fetchData() {
         
         const proxyResponse = await fetch(proxyUrl);
         const data = await proxyResponse.json(); 
-        
+        // script.js の fetchData 関数内にある、allDataを定義している部分を、
+        // 以下のコードで置き換えてください。
+
         allData = data.map(item => ({
-            // キー名はスプレッドシートのヘッダーに一致させる
+            // ========== 必須項目（ウェブページ側で利用するキー） ==========
+            // JSONのキー（item.単語など）は、スプレッドシートの1行目のヘッダーと完全に一致しています。
             word: item.単語,
             meaning: item.意味,
             stem: item.基幹,
             prefix: item.接頭辞,
+        
+            // ========== 追加された項目（不足していた部分） ==========
+            englishTranslation: item.英訳,
             prefixMeaning: item.接頭辞基本意味,
-            example1: item.例文1
-            // ... 他のデータも同様に
+            nuance: item.語感,
+            syntax: item.構文,
+            separability: item.分離性,
+            conjugation: item.活用,
+            
+            // ========== 例文・派生語など ==========
+            example1: item.例文1,
+            japaneseTranslation1: item.日本語訳1,
+            example2: item.例文2,
+            japaneseTranslation2: item.日本語訳2,
+            derivatives: item.派生語,
+            correspondingEnglish: item.対応英単語
         }));
-
+        
         initializePage();
+
 
     } catch (error) {
         console.error("データの取得中にエラーが発生しました。外部プロキシまたはGASの設定を確認してください:", error);
