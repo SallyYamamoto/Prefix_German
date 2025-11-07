@@ -1,31 +1,444 @@
-`<!DOCTYPE **html**>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>接頭辞付き動詞データベース</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>動詞辞書ビューア</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* カスタムフォントと基本設定 */
+        body {
+            font-family: 'Hiragino Sans', 'Meiryo', 'Yu Gothic', sans-serif;
+            color: #000;
+            line-height: 1.6;
+            background-color: #f7f7f7;
+            min-height: 100vh;
+        }
+        
+        /* 辞書カードの基本スタイル */
+        .verb-card {
+            background-color: #fff;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 1. ヘッダー (単語) */
+        .card-header h3 {
+            font-size: 2.2em;
+            font-weight: 500;
+            margin: 0 0 5px 0;
+            display: inline-block;
+            border-bottom: 2px solid #000; /* タイトルの下線 */
+            padding-bottom: 3px;
+        }
+        /* 派生情報 (接頭辞 + 基幹) */
+        .etymology {
+            font-size: 1.1em;
+            color: #007bff; /* 青系の色 */
+            font-style: italic;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* 2. 意味 */
+        .meaning-jp {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin: 25px 0 3px 0;
+            color: #333;
+        }
+        .meaning-en {
+            font-style: italic;
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* 3. 詳細情報 */
+        .detail-item {
+            display: flex;
+            margin-bottom: 6px;
+        }
+        .detail-label {
+            width: 100px; /* レイアウトを揃えるための固定幅 */
+            font-weight: normal;
+            margin-right: 15px;
+            color: #333;
+            flex-shrink: 0;
+        }
+        .detail-value {
+            flex-grow: 1;
+            font-size: 0.95em;
+        }
+        .german-term {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-style: italic;
+            background-color: #fcfcfc;
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+        .highlight-detail {
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        /* 4. 例文 */
+        .example-section {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+        .example-box {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        .vertical-line {
+            border-left: 2px solid #007bff; /* 例文の左側の青い縦線 */
+            height: auto;
+            margin-right: 15px;
+            min-height: 2.5em; 
+            border-radius: 1px;
+            flex-shrink: 0;
+        }
+        .example-content {
+            flex-grow: 1;
+        }
+        .german-sentence {
+            font-weight: normal;
+            margin: 0;
+            font-size: 1.05em;
+        }
+        .japanese-translation {
+            font-size: 0.9em;
+            color: #555;
+            margin: 0;
+            line-height: 1.2;
+            font-style: italic;
+        }
+
+        /* 5. 派生語/関連語 */
+        .related-section {
+            margin-top: 25px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        .related-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+        .icon {
+            font-size: 1.3em;
+            color: #007bff;
+            margin-right: 8px;
+            line-height: 1;
+        }
+
+        /* フィルタリングリスト */
+        .filter-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .filter-list li {
+            padding: 2px 0;
+        }
+        .filter-list a {
+            display: block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .filter-list a:hover {
+            background-color: #eef;
+        }
+        .filter-list a.active {
+            background-color: #007bff;
+            color: white;
+            font-weight: 700;
+        }
+        
+        /* ローディング・エラーメッセージ */
+        #main-content {
+            min-height: 50vh;
+        }
+        
+        /* レスポンシブ対応 */
+        @media (max-width: 1024px) {
+            .verb-card {
+                padding: 20px;
+            }
+            .sidebar {
+                border-right: none !important;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 20px;
+            }
+            .grid-cols-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body>
-    <h1>接頭辞付き動詞データベース</h1>
-    
-    <div id="container">
-        <div id="sidebar-left">
-            <h2>接頭辞リスト</h2>
-            <ul id="prefix-list" class="filter-list"></ul>
-        </div>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <header class="text-center mb-10">
+        <h1 class="text-3xl font-bold text-gray-800">ドイツ語動詞辞書</h1>
+        <p class="text-gray-500 mt-2">接頭辞と基幹に基づいたフィルタリングビューア</p>
+    </header>
+
+    <div id="app-container" class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        <div id="sidebar-right">
-            <h2>基幹リスト</h2>
-            <ul id="stem-list" class="filter-list"></ul>
-        </div>
-        
-        <main id="main-content">
-            <h2>単語一覧</h2>
+        <!-- サイドバー (フィルタリング) -->
+        <aside class="sidebar lg:col-span-1 bg-white p-6 rounded-lg shadow-lg border-r border-gray-200">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">フィルタリング</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-2 text-gray-600">接頭辞 (Prefix)</h3>
+                <ul id="prefix-list" class="filter-list text-sm">
+                    <!-- 接頭辞リストがここに挿入されます -->
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-medium mb-2 text-gray-600">基幹 (Stem)</h3>
+                <ul id="stem-list" class="filter-list text-sm">
+                    <!-- 基幹リストがここに挿入されます -->
+                </ul>
+            </div>
+        </aside>
+
+        <!-- メインコンテンツ (単語詳細) -->
+        <main id="main-content" class="lg:col-span-3">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">単語一覧（接頭辞：全て）</h2>
             <div id="verb-details">
-                </div>
+                <p class="text-center text-gray-500 mt-10">データを読み込み中です...</p>
+            </div>
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // ----------------------------------------------------
+        // JavaScript ロジック (script.js の内容を統合)
+        // ----------------------------------------------------
+        
+        // GASのウェブアプリURLをここに設定
+        const JSON_URL = 'https://script.google.com/macros/s/AKfycbynlFiThdK8QwcmIm6ZsMssBtNaKrpFN64zDlkRXyTdii3K7ucvEwWocW5BrcczjvC2IA/exec';
+        let allData = []; // 全データを保持するグローバル変数
+
+        // データを取得し、整形する関数
+        async function fetchData() {
+            try {
+                // プロキシサービス (allorigins.win) を使ってCORSエラーを回避し、JSONデータを取得
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(JSON_URL)}`;
+                
+                const proxyResponse = await fetch(proxyUrl);
+                const data = await proxyResponse.json(); 
+                
+                // JSONデータから必要な情報を抽出・マッピング
+                allData = data.map(item => ({
+                    // JSONのキー（item.単語など）は、スプレッドシートの1行目のヘッダーと完全に一致させる
+                    word: item.単語,
+                    meaning: item.意味,
+                    stem: item.基幹,
+                    prefix: item.接頭辞,
+                    englishTranslation: item.英訳,
+                    prefixMeaning: item.接頭辞基本意味,
+                    nuance: item.語感,
+                    syntax: item.構文,
+                    separability: item.分離性,
+                    conjugation: item.活用,
+                    example1: item.例文1,
+                    japaneseTranslation1: item.日本語訳1,
+                    example2: item.例文2,
+                    japaneseTranslation2: item.日本語訳2,
+                    derivatives: item.派生語,
+                    correspondingEnglish: item.対応英単語
+                }));
+                
+                initializePage();
+
+            } catch (error) {
+                console.error("データの取得中にエラーが発生しました。外部プロキシまたはGASの設定を確認してください:", error);
+                document.getElementById('verb-details').innerHTML = '<p class="text-center text-red-600 mt-10">データの読み込みに失敗しました。GASのURL、権限、デプロイ状態を再度確認してください。</p>';
+            }
+        }
+
+        // フィルタリングリスト（接頭辞と基幹）を初期化する
+        function initializePage() {
+            // 固有の接頭辞と基幹のリストを作成
+            const prefixes = [...new Set(allData.map(item => item.prefix))].sort();
+            const stems = [...new Set(allData.map(item => item.stem))].sort();
+
+            renderFilterList('prefix-list', prefixes, 'prefix');
+            renderFilterList('stem-list', stems, 'stem');
+
+            // 初期表示として全動詞を表示
+            renderVerbDetails(allData);
+        }
+
+        // フィルタリングリスト（UL要素）をHTMLに描画する
+        function renderFilterList(elementId, items, type) {
+            const listElement = document.getElementById(elementId);
+            listElement.innerHTML = '';
+            
+            // 全て表示リンクを追加
+            const allItem = document.createElement('li');
+            const allText = type === 'prefix' ? '全ての接頭辞' : '全ての基幹';
+            allItem.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="${type}" class="active">**${allText}**</a>`;
+            allItem.querySelector('a').addEventListener('click', (e) => filterData(e, type));
+            listElement.appendChild(allItem);
+            
+            // 各接頭辞/基幹のリンクを追加
+            items.forEach(item => {
+                if (!item || String(item).trim().length === 0) return;
+                
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<a href="#" data-filter-value="${item}" data-filter-type="${type}">${item}</a>`;
+                listItem.querySelector('a').addEventListener('click', (e) => filterData(e, type));
+                listElement.appendChild(listItem);
+            });
+        }
+
+        // フィルタリングを実行し、結果をメインコンテンツに表示する
+        function filterData(e, type) {
+            e.preventDefault(); 
+            const filterValue = e.target.getAttribute('data-filter-value');
+            
+            let filteredData;
+            const headingElement = document.getElementById('main-content').querySelector('h2');
+            
+            if (filterValue === 'all') {
+                filteredData = allData;
+                headingElement.textContent = `単語一覧（${type === 'prefix' ? '接頭辞' : '基幹'}：全て）`;
+            } else if (type === 'prefix') {
+                filteredData = allData.filter(item => item.prefix === filterValue);
+                headingElement.textContent = `単語一覧（接頭辞：${filterValue}）`;
+            } else if (type === 'stem') {
+                filteredData = allData.filter(item => item.stem === filterValue);
+                headingElement.textContent = `単語一覧（基幹：${filterValue}）`;
+            }
+            
+            renderVerbDetails(filteredData);
+            
+            // ハイライト処理
+            document.querySelectorAll('.filter-list a').forEach(a => a.classList.remove('active'));
+            e.target.classList.add('active');
+        }
+
+        // 動詞の詳細リストをHTMLに描画する (デザイン反映済み)
+        function renderVerbDetails(data) {
+            const detailsElement = document.getElementById('verb-details');
+            detailsElement.innerHTML = ''; 
+            
+            if (data.length === 0) {
+                detailsElement.innerHTML = '<p class="text-center text-gray-500 mt-10">該当する単語は見つかりませんでした。</p>';
+                return;
+            }
+
+            data.forEach(item => {
+                const verbCard = document.createElement('div');
+                verbCard.classList.add('verb-card');
+                
+                // 例文 2 の HTML を安全に生成
+                let example2Html = '';
+                if (item.example2 && String(item.example2).trim().length > 0) {
+                    example2Html = `
+                        <div class="example-box">
+                            <div class="vertical-line"></div>
+                            <div class="example-content">
+                                <p class="german-sentence">${item.example2}</p>
+                                <p class="japanese-translation">（${item.japaneseTranslation2 || '---'}）</p>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // 派生語と対応英単語のHTMLを生成
+                const relatedHtml = `
+                    <div class="related-section">
+                        ${(item.derivatives && String(item.derivatives).trim().length > 0) ? `
+                            <div class="related-item">
+                                <span class="icon">🔗</span>
+                                <span class="detail-label">派生語:</span>
+                                <span class="german-term">${item.derivatives}</span>
+                            </div>
+                        ` : ''}
+                        
+                        ${(item.correspondingEnglish && String(item.correspondingEnglish).trim().length > 0) ? `
+                            <div class="related-item">
+                                <span class="icon">🇬🇧</span>
+                                <span class="detail-label">類似英単語:</span>
+                                <span class="highlight-detail">${item.correspondingEnglish}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                // 全ての項目を新しいデザイン構造に埋め込む
+                verbCard.innerHTML = `
+                    <div class="card-header">
+                        <h3>${item.word}</h3>
+                        <div class="etymology">${item.prefix || '---'} + ${item.stem || '---'}</div>
+                    </div>
+
+                    <div class="meaning-jp">${item.meaning}</div>
+                    <div class="meaning-en">(${item.englishTranslation || '---'})</div>
+
+                    <div class="detail-section">
+                        <div class="detail-item">
+                            <span class="detail-label">構成:</span>
+                            <span class="detail-value highlight-detail">${item.prefix || '---'} + ${item.stem || '---'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">分離性:</span>
+                            <span class="detail-value">${item.separability || '---'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">語感:</span>
+                            <span class="detail-value">${item.nuance || '---'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">構文:</span>
+                            <span class="detail-value"><span class="german-term">${item.syntax || '---'}</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">活用:</span>
+                            <span class="detail-value"><span class="german-term">${item.conjugation || '---'}</span></span>
+                        </div>
+                    </div>
+
+                    <div class="example-section">
+                        <h4 class="text-lg font-medium mb-3 text-gray-700">例文</h4>
+                        <div class="example-box">
+                            <div class="vertical-line"></div>
+                            <div class="example-content">
+                                <p class="german-sentence">${item.example1 || '---'}</p>
+                                <p class="japanese-translation">（${item.japaneseTranslation1 || '---'}）</p>
+                            </div>
+                        </div>
+                        ${example2Html}
+                    </div>
+                    
+                    ${relatedHtml}
+                `;
+                detailsElement.appendChild(verbCard);
+            });
+        }
+
+        // ページのロード時にデータ取得を開始
+        fetchData();
+    </script>
 </body>
-</html>`
+</html>
