@@ -399,7 +399,14 @@
                     <div class="detail-section">
                         <div class="detail-item">
                             <span class="detail-label">構成:</span>
-                            <span class="detail-value highlight-detail">${item.prefix || '---'} + ${item.stem || '---'}</span>
+                            <span class="detail-value highlight-detail">
+                                ${item.prefix || '---'}
+                                ${(item.prefixMeaning && String(item.prefixMeaning).trim().length > 0) 
+                                    ? `（${item.prefixMeaning}）` 
+                                    : ''
+                                }
+                                + ${item.stem || '---'}
+                            </span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">分離性:</span>
