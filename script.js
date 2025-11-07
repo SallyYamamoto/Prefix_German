@@ -107,7 +107,7 @@ function filterData(e, type) {
     e.target.classList.add('active');
 }
 
-// 動詞の詳細リストをHTMLに描画する (全項目表示版)
+// script.js 内の renderVerbDetails 関数 (最終修正版)
 function renderVerbDetails(data) {
     const detailsElement = document.getElementById('verb-details');
     detailsElement.innerHTML = ''; // 一旦クリア
@@ -122,6 +122,18 @@ function renderVerbDetails(data) {
         const verbCard = document.createElement('div');
         verbCard.classList.add('verb-card');
         
+        // 例文 2 の HTML 部分を変数として定義 (構文エラー回避のため)
+        let example2Html = '';
+        if (item.example2) {
+            example2Html = `
+                <h4>例文 2</h4>
+                <blockquote>
+                    ${item.example2}<br>
+                    <em>${item.japaneseTranslation2 || '---'}</em>
+                </blockquote>
+            `;
+        }
+
         // 全ての項目を表示するように拡張
         verbCard.innerHTML = `
             <h3>${item.word} (${item.englishTranslation || '---'})</h3>
@@ -140,15 +152,7 @@ function renderVerbDetails(data) {
                 <em>${item.japaneseTranslation1 || '---'}</em>
             </blockquote>
             
-            ${item.example2 ? `
-                <h4>例文 2</h4>
-                <blockquote>
-                    ${item.example2 || '---'}<br>
-                    <em>${item.japaneseTranslation2 || '---'}</em>
-                </blockquote>
-            ` : ''}
-
-            <p><strong>派生語:</strong> ${item.derivatives || '---'}</p>
+            ${example2Html} <p><strong>派生語:</strong> ${item.derivatives || '---'}</p>
             <p><strong>対応英単語:</strong> ${item.correspondingEnglish || '---'}</p>
             <hr>
         `;
