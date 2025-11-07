@@ -78,24 +78,47 @@ function initializePage() {
     renderVerbDetails(allData);
 }
 
-// フィルタリングリスト（UL要素）をHTMLに描画する
-function renderFilterList(elementId, items, type) {
-    const listElement = document.getElementById(elementId);
-    listElement.innerHTML = '';
+// script.js 内の renderVerbDetails 関数 (修正版)
+function renderVerbDetails(data) {
+    const detailsElement = document.getElementById('verb-details');
+    detailsElement.innerHTML = ''; // 一旦クリア
     
-    // 全て表示リンクを追加
-    const allItem = document.createElement('li');
-    allItem.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="${type}">**全て表示**</a>`;
-    allItem.querySelector('a').addEventListener('click', (e) => filterData(e, type));
-    listElement.appendChild(allItem);
-    
-    // 各接頭辞/基幹のリンクを追加
-    items.forEach(item => {
-        const listItem = document.createElement('li');
-        // クリック時にfilterData関数を呼び出す
-        listItem.innerHTML = `<a href="#" data-filter-value="${item}" data-filter-type="${type}">${item}</a>`;
-        listItem.querySelector('a').addEventListener('click', (e) => filterData(e, type));
-        listElement.appendChild(listItem);
+    if (data.length === 0) {
+        detailsElement.innerHTML = '<p>該当する単語は見つかりませんでした。</p>';
+        return;
+    }
+
+    // 取得したデータを行ごとに表示
+    data.forEach(item => {
+        const verbCard = document.createElement('div');
+        verbCard.classList.add('verb-card');
+        
+        // 以下のinnerHTML部分を拡張し、全ての項目を表示します
+        verbCard.innerHTML = `
+            <h3>${item.word} (${item.englishTranslation})</h3>
+            <p><strong>意味:</strong> ${item.meaning}</p>
+            <p><strong>基幹:</strong> ${item.stem}</p>
+            <p><strong>接頭辞:</strong> ${item.prefix} (${item.prefixMeaning})</p>
+            <p><strong>語感:</strong> ${item.nuance || '---'}</p>
+            <p><strong>構文/分離性/活用:</strong> ${item.syntax || '---'} / ${item.separability || '---'} / ${item.conjugation || '---'}</p>
+            
+            <h4>例文 1</h4>
+            <blockquote>
+                ${item.example1 || '---'}<br>
+                <em>${item.japaneseTranslation1 || '---'}</em>
+            </blockquote>
+            
+            <h4>例文 2</h4>
+            <blockquote>
+                ${item.example2 || '---'}<br>
+                <em>${item.japaneseTranslation2 || '---'}</em>
+            </blockquote>
+
+            <p><strong>派生語:</strong> ${item.derivatives || '---'}</p>
+            <p><strong>対応英単語:</strong> ${item.correspondingEnglish || '---'}</p>
+            <hr>
+        `;
+        detailsElement.appendChild(verbCard);
     });
 }
 
