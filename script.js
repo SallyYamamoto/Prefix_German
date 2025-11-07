@@ -1,17 +1,36 @@
-const JSON_URL = 'https://script.google.com/macros/s/AKfycbzdBpkdPeTFcBk1LUmF7f4gVvIOyMejbIP9qa5mx6nJaJrs3ZnwlqHzkXh_4ydpiVIAuA/exec';
+const JSON_URL = 'https://script.google.com/macros/s/AKfycbynlFiThdK8QwcmIm6ZsMssBtNaKrpFN64zDlkRXyTdii3K7ucvEwWocW5BrcczjvC2IA/exec';
 let allData = []; // 全データを保持するグローバル変数
+
+// script.js の fetchData 関数 (修正版)
 
 // データを取得し、整形する関数
 async function fetchData() {
     try {
-        // 新しいApps ScriptのURLからデータを取得
-        const response = await fetch(JSON_URL);
-        // JSONデータを直接パース
-        const data = await response.json(); 
+        const response = await fetch(JSON_URL, {
+            // ⭐ 以下のオプションを追加: これによりCORSエラーを回避します
+            mode: 'no-cors' 
+        });
         
-        // データをそのまま allData に格納
+        // no-corsモードでは、レスポンスが不透明（opaque）になるため、
+        // response.json() を直接呼び出すことができません。
+        // 代わりに、JSONPや他の方法を検討する必要があります。
+
+        // **しかし、簡単なfetchでは解決できないため、ここで方法を切り替えます。**
+        
+        // ⭐⭐ JSONPの回避策として、外部プロキシサービスを利用します ⭐⭐
+        // この方法が最も確実ですが、外部サービスへの依存が発生します。
+
+        // ウェブページ側で、以下のURL形式に変更してデータを取得します。
+        // （JSON_URLは、GASのウェブアプリURLのままです）
+
+        // プロキシサービス (例: allorigins.win) を使ってCORSを回避し、JSONデータを取得
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(JSON_URL)}`;
+        
+        const proxyResponse = await fetch(proxyUrl);
+        const data = await proxyResponse.json(); 
+        
         allData = data.map(item => ({
-            // Apps Script のコードで設定したキー名（小文字、特殊文字なし）に合わせる
+            // キー名はスプレッドシートのヘッダーに一致させる
             word: item.単語,
             meaning: item.意味,
             stem: item.基幹,
@@ -24,8 +43,8 @@ async function fetchData() {
         initializePage();
 
     } catch (error) {
-        console.error("データの取得中にエラーが発生しました:", error);
-        document.getElementById('main-content').innerHTML = '<p>データの読み込みに失敗しました。スプレッドシートの公開設定を確認してください。</p>';
+        console.error("データの取得中にエラーが発生しました。外部プロキシまたはGASの設定を確認してください:", error);
+        document.getElementById('main-content').innerHTML = '<p>データの読み込みに失敗しました。GASのURL、権限、デプロイ状態を再度確認してください。</p>';
     }
 }
 
