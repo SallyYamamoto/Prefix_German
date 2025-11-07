@@ -4,19 +4,21 @@ let allData = []; // 全データを保持するグローバル変数
 // データを取得し、整形する関数
 async function fetchData() {
     try {
+        // 新しいApps ScriptのURLからデータを取得
         const response = await fetch(JSON_URL);
-        const json = await response.json();
+        // JSONデータを直接パース
+        const data = await response.json(); 
         
-        // Google Sheets APIのJSON構造は複雑なので、必要なデータのみを抽出
-        // 'gsx$'の後にスプレッドシートの列名（小文字、スペースなし）が続きます
-        allData = json.feed.entry.map(item => ({
-            word: item.gsx$単語.$t,
-            meaning: item.gsx$意味.$t,
-            stem: item.gsx$基幹.$t,
-            prefix: item.gsx$接頭辞.$t,
-            // 必要に応じて他の列も追加...
-            prefixMeaning: item.gsx$接頭辞基本意味.$t,
-            example1: item.gsx$例文1.$t
+        // データをそのまま allData に格納
+        allData = data.map(item => ({
+            // Apps Script のコードで設定したキー名（小文字、特殊文字なし）に合わせる
+            word: item.単語,
+            meaning: item.意味,
+            stem: item.基幹,
+            prefix: item.接頭辞,
+            prefixMeaning: item.接頭辞基本意味,
+            example1: item.例文1
+            // ... 他のデータも同様に
         }));
 
         initializePage();
