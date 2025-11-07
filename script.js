@@ -1,4 +1,4 @@
-const JSON_URL = 'https://spreadsheets.google.com/feeds/list/1XWio2L_xMSe96QG4sRQevphCyDM21IPQgLHJN3Bdz54/od6/public/values?alt=json';
+const JSON_URL = 'https://script.google.com/macros/s/AKfycbzX05lTnpeKf4xzjlT7NCEIv5ofH5j7MlRYpvF-4-WpmJBHmg0UpHBkhjxM22JfU3ZgTw/exec';
 let allData = []; // 全データを保持するグローバル変数
 
 // データを取得し、整形する関数
