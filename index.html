@@ -465,32 +465,39 @@
 
         // フィルタリングを実行し、結果をメインコンテンツに表示する
         function filterData(e, type) {
-            e.preventDefault(); 
+            e.preventDefault();
             const filterValue = e.target.getAttribute('data-filter-value');
-            const descElement = document.getElementById('prefix-description');
-            const headingElement = document.getElementById('main-content').querySelector('h2');
-            let filteredData;
         
+            let filteredData;
+            const headingElement = document.getElementById('main-content').querySelector('h2');
+        
+            // フィルタ処理
             if (filterValue === 'all') {
                 filteredData = allData;
-                headingElement.textContent = `単語一覧（${type === 'prefix' ? '接頭辞' : '基幹'}：全て）`;
-                descElement.textContent = ""; // 説明をクリア
+                headingElement.innerHTML = `<span class="text-gray-500 text-2xl font-semibold">すべての単語</span>`;
             } else if (type === 'prefix') {
                 filteredData = allData.filter(item => item.prefix && item.prefix === filterValue);
-                headingElement.textContent = `単語一覧（接頭辞：${filterValue}）`;
-                // 接頭辞の説明を表示
-                descElement.textContent = prefixExplanations[filterValue] || "";
+                headingElement.innerHTML = `
+                    <div class="text-center mt-2 mb-6">
+                        <span class="inline-block text-4xl font-bold text-blue-700 tracking-wide">${filterValue}-</span>
+                    </div>
+                `;
             } else if (type === 'stem') {
                 filteredData = allData.filter(item => item.stem && item.stem === filterValue);
-                headingElement.textContent = `単語一覧（基幹：${filterValue}）`;
-                descElement.textContent = ""; // 接頭辞説明は非表示
+                headingElement.innerHTML = `
+                    <div class="text-center mt-2 mb-6">
+                        <span class="inline-block text-4xl font-bold text-green-700 tracking-wide">-${filterValue}</span>
+                    </div>
+                `;
             }
         
             renderVerbDetails(filteredData);
         
+            // ハイライト
             document.querySelectorAll('.filter-list a').forEach(a => a.classList.remove('active'));
             e.target.classList.add('active');
         }
+
 
 
         // 動詞の詳細リストをHTMLに描画する (デザイン反映済み)
