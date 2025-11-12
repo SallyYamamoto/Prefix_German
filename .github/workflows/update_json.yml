@@ -1,0 +1,30 @@
+name: Update verbs.json from Notion
+
+on:
+  schedule:
+    - cron: "0 3 * * *"  # 毎日午前3時に更新（UTC）
+  workflow_dispatch:      # 手動実行も可能
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install dependencies
+        run: pip install requests
+      - name: Fetch data from Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        run: python .github/scripts/fetch_notion.py
+      - name: Commit and push JSON
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git add verbs.json
+          git commit -m "Update verbs.json from Notion" || echo "No changes"
+          git push
