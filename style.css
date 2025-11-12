@@ -61,3 +61,13 @@ body {
 .stem-section:last-child {
   border-bottom: none;
 }
+
+.prefix-section {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+
+.prefix-section:last-child {
+  border-bottom: none;
+}
+
