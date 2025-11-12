@@ -226,6 +226,23 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
+        /* 🔹 Stickyヘッダー（接頭辞表示＋説明） */
+        #sticky-header {
+            position: sticky;
+            top: 0;
+            background-color: #f7f7f7;
+            z-index: 50;
+            padding: 10px 0;
+            border-bottom: 2px solid #ddd;
+        }
+        #prefix-description {
+            font-size: 0.95em;
+            color: #555;
+            margin-top: 5px;
+            text-align: center;
+            font-style: italic;
+        }
+
     </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
