@@ -1,614 +1,305 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>動詞辞書ビューア</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* カスタムフォントと基本設定 */
-        body {
-            font-family: 'Hiragino Sans', 'Meiryo', 'Yu Gothic', sans-serif;
-            color: #000;
-            line-height: 1.5; /* 行間をわずかに詰める */
-            background-color: #f7f7f7;
-            min-height: 100vh;
-        }
-        
-        /* 辞書カードの基本スタイル */
-        .verb-card {
-            background-color: #fff;
-            padding: 20px 25px; /* パディングを少し減らす */
-            margin-bottom: 20px; /* マージンを減らす */
-            border-radius: 8px;
-            box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.04);
-            /* 2列表示のため最大幅の制限を解除 */
-            max-width: none; 
-            margin-left: 0;
-            margin-right: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>動詞辞書ビューア</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Hiragino Sans', 'Meiryo', 'Yu Gothic', sans-serif;
+      background-color: #f7f7f7;
+      color: #000;
+      line-height: 1.5;
+    }
 
-        /* 1. ヘッダー (単語) */
-        .card-header h3 {
-            font-size: 2.0em; /* サイズをわずかに小さく */
-            font-weight: 500;
-            margin: 0 0 3px 0;
-            display: inline-block;
-            border-bottom: 2px solid #000;
-            padding-bottom: 1px; /* パディングを減らす */
-        }
-        /* 派生情報 (接頭辞 + 基幹) */
-        .etymology {
-            font-size: 1.0em; /* サイズをわずかに小さく */
-            color: #007bff; 
-            font-style: italic;
-            margin-top: 3px; /* マージンを減らす */
-            font-weight: 500;
-        }
+    .verb-card {
+      background-color: #fff;
+      padding: 20px 25px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.08),
+        0 1px 3px -1px rgba(0, 0, 0, 0.04);
+    }
 
-        /* 2. 意味 */
-        .meaning-jp {
-            font-size: 1.3em; /* サイズをわずかに小さく */
-            font-weight: 700;
-            margin: 20px 0 3px 0; /* マージンを減らす */
-            color: #333;
-        }
-        .meaning-en {
-            font-style: italic;
-            font-size: 0.95em; /* サイズをわずかに小さく */
-            color: #666;
-            margin-bottom: 20px; /* マージンを減らす */
-            padding-bottom: 8px; /* パディングを減らす */
-            border-bottom: 1px solid #eee;
-        }
+    .filter-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding: 0;
+      margin: 0;
+    }
 
-        /* 3. 詳細情報 */
-        .detail-item {
-            display: flex;
-            margin-bottom: 4px; /* マージンを減らす */
-            align-items: baseline;
-        }
-        .detail-label {
-            width: 80px; /* 固定幅を縮小 */
-            font-weight: normal;
-            margin-right: 10px; /* マージンを減らす */
-            color: #333;
-            flex-shrink: 0;
-            font-size: 0.9em;
-        }
-        .detail-value {
-            flex-grow: 1;
-            font-size: 0.9em; /* サイズをわずかに小さく */
-        }
-        .german-term {
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-style: italic;
-            background-color: #fcfcfc;
-            padding: 0 2px; /* パディングを減らす */
-            border-radius: 3px;
-        }
-        .highlight-detail {
-            color: #007bff;
-            font-weight: 500;
-        }
+    .filter-list a {
+      display: inline-block;
+      padding: 3px 6px;
+      border-radius: 4px;
+      color: #333;
+      text-decoration: none;
+      transition: background-color 0.2s;
+      font-size: 0.9em;
+    }
 
-        /* 4. 例文 */
-        .example-section {
-            margin-top: 20px; /* マージンを減らす */
-            padding-top: 10px;
-            border-top: 1px dashed #ddd;
-        }
-        .example-box {
-            display: flex;
-            margin-bottom: 15px; /* マージンを減らす */
-            align-items: flex-start;
-        }
-        .vertical-line {
-            border-left: 2px solid #007bff;
-            height: auto;
-            margin-right: 10px; /* マージンを減らす */
-            min-height: 2em; /* 最小高さを調整 */
-            border-radius: 1px;
-            flex-shrink: 0;
-        }
-        .example-content {
-            flex-grow: 1;
-        }
-        .german-sentence {
-            font-weight: normal;
-            margin: 0;
-            font-size: 1.0em;
-        }
-        .japanese-translation {
-            font-size: 0.85em; /* サイズをわずかに小さく */
-            color: #555;
-            margin: 0;
-            line-height: 1.2;
-            font-style: italic;
-        }
+    .filter-list a:hover {
+      background-color: #eef;
+    }
 
-        /* 5. 派生語/関連語 */
-        .related-section {
-            margin-top: 15px; /* マージンを減らす */
-            border-top: 1px solid #eee;
-            padding-top: 10px; /* パディングを減らす */
-        }
-        .related-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 3px; /* マージンを減らす */
-            font-size: 0.9em; /* サイズをわずかに小さく */
-        }
-        .icon {
-            font-size: 1.2em; /* サイズをわずかに小さく */
-            color: #007bff;
-            margin-right: 6px;
-            line-height: 1;
-        }
+    .filter-list a.active {
+      background-color: #007bff;
+      color: white;
+      font-weight: 700;
+    }
 
-        /* フィルタリングリスト - 横並びスタイルは維持 */
-        .filter-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;          
-            flex-wrap: wrap;        
-            gap: 5px;               
-        }
-        .filter-list li {
-            padding: 0;
-            margin: 0;
-            display: inline-block;
-        }
-        .filter-list a {
-            display: inline-block;
-            padding: 3px 6px; /* パディングを調整 */
-            border-radius: 4px;
-            color: #333;
-            text-decoration: none;
-            transition: background-color 0.2s;
-            white-space: nowrap; 
-            font-size: 0.9em; /* 文字サイズをわずかに小さく */
-        }
-        .filter-list a:hover {
-            background-color: #eef;
-        }
-        .filter-list a.active {
-            background-color: #007bff;
-            color: white;
-            font-weight: 700;
-        }
-        
-        /* スラッシュ区切りと「全て」の特殊対応 */
-        .filter-list li:not(.all-item):not(:last-child)::after {
-            content: "/";
-            margin-left: 5px;
-            margin-right: 5px;
-            color: #ccc;
-        }
-        .all-item a {
-            padding: 3px 8px;
-            margin-right: 8px;
-        }
+    #current-filter {
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid #ddd;
+    }
 
-
-        /* ローディング・エラーメッセージ */
-        #main-content {
-            min-height: 50vh;
-        }
-        
-        /* レスポンシブ対応 */
-        @media (max-width: 1024px) {
-            .verb-card {
-                padding: 20px;
-            }
-            .sidebar {
-                border-right: none !important;
-                border-bottom: 1px solid #ddd;
-                padding-bottom: 20px;
-            }
-            /* タブレット以下では1列を維持 */
-            .grid-cols-4 {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* メインコンテンツ - 2列表示のスタイル */
-        .verb-grid {
-            display: grid;
-            gap: 20px; /* カード間の間隔を調整 */
-        }
-        
-        /* デスクトップ (lg) 以上で2列表示 */
-        @media (min-width: 1024px) {
-            .verb-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-    </style>
+    #prefix-explanation {
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid #cbd5e1;
+    }
+  </style>
 </head>
+
 <body class="p-4 sm:p-6 lg:p-8">
+  <header class="text-center mb-10">
+    <h1 class="text-3xl font-bold text-gray-800">ドイツ語動詞辞書</h1>
+    <p class="text-gray-500 mt-2">接頭辞と基幹に基づいたフィルタリングビューア</p>
+  </header>
 
-    <header class="text-center mb-10">
-        <h1 class="text-3xl font-bold text-gray-800">ドイツ語動詞辞書</h1>
-        <p class="text-gray-500 mt-2">接頭辞と基幹に基づいたフィルタリングビューア</p>
-    </header>
+  <div id="app-container" class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <!-- サイドバー -->
+    <aside
+      class="sidebar lg:col-span-1 bg-white p-6 rounded-lg shadow-lg border-r border-gray-200">
+      <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">
+        フィルタリング
+      </h2>
 
-    <div id="app-container" class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        
-        <!-- サイドバー (フィルタリング) -->
-        <aside class="sidebar lg:col-span-1 bg-white p-6 rounded-lg shadow-lg border-r border-gray-200">
-            <h2 class="text-xl font-semibold mb-4 border-b pb-2 text-gray-700">フィルタリング</h2>
-            
-            <div class="mb-6">
-                <h3 class="text-lg font-medium mb-2 text-gray-600">接頭辞 (Prefix)</h3>
-                <ul id="prefix-list" class="filter-list text-sm">
-                    <!-- 接頭辞リストがここに挿入されます -->
-                </ul>
-            </div>
+      <div class="mb-6">
+        <h3 class="text-lg font-medium mb-2 text-gray-600">接頭辞 (Prefix)</h3>
+        <ul id="prefix-list" class="filter-list text-sm"></ul>
+      </div>
 
-            <div>
-                <h3 class="text-lg font-medium mb-2 text-gray-600">基幹 (Stem)</h3>
-                <ul id="stem-list" class="filter-list text-sm">
-                    <!-- 基幹リストがここに挿入されます -->
-                </ul>
-            </div>
-        </aside>
+      <div>
+        <h3 class="text-lg font-medium mb-2 text-gray-600">基幹 (Stem)</h3>
+        <ul id="stem-list" class="filter-list text-sm"></ul>
+      </div>
+    </aside>
 
-        <!-- メインコンテンツ (単語詳細) -->
-        <main id="main-content" class="lg:col-span-3">
-            <h2 class="text-2xl font-semibold mb-6 text-gray-800">単語一覧（接頭辞：全て）</h2>
-            <div id="prefix-description" class="mb-6 text-gray-600 text-sm italic"></div>
-            <div id="verb-details" class="verb-grid">
-                <p class="text-center text-gray-500 mt-10 col-span-full">データを読み込み中です...</p>
-            </div>
-        </main>
-    </div>
+    <!-- メイン -->
+    <main id="main-content" class="lg:col-span-3">
+      <!-- Stickyヘッダー -->
+      <div
+        id="current-filter"
+        class="sticky top-0 z-30 bg-white shadow-sm text-center py-3 mb-2 hidden">
+      </div>
 
-    <script>
-        // ----------------------------------------------------
-        // JavaScript ロジック (データの取得と表示)
-        // ----------------------------------------------------
-        
-        // **データソースURL**: GitHubのRawファイルURLを設定
-        const JSON_URL = 'https://raw.githubusercontent.com/SallyYamamoto/Prefix_German/refs/heads/main/verbs.json';
-        let allData = []; // 全データを保持するグローバル変数
-        // 接頭辞の意味説明マップ
-        const prefixExplanations = {
-            "be": "be- は動詞を他動詞化し、対象への働きかけを表す。例: befragen（質問する）、bemalen（塗る）。",
-            "ent": "ent- は『離れる』『取り除く』『反対の動作』を意味する。例: entkommen（逃れる）、entfernen（取り除く）。",
-            "ver": "ver- は『間違い・変化・消滅』などを表す。例: verlieren（失う）、verändern（変化させる）。",
-            "zer": "zer- は『分解・破壊・分裂』を意味する。例: zerreißen（引き裂く）。",
-            "auf": "auf- は『上昇・開始・開放』を意味する。例: aufstehen（起きる）、aufmachen（開ける）。",
-            "an": "an- は『接近・開始・関与』を表す。例: anfangen（始める）、anrufen（電話する）。",
-            "aus": "aus- は『外への動き・完了・結果』を表す。例: ausgehen（出かける）、ausruhen（休む）。",
-            "nach": "nach- は『後に続く・模倣・再現』を意味する。例: nachmachen（まねる）、nachfragen（問い合わせる）。",
-            "mit": "mit- は『共に・一緒に』を意味する。例: mitnehmen（持って行く）、mitarbeiten（協力する）。",
-            "unter": "unter- は『下・補助・不足・秘密裏』など多義的。例: unterhalten（楽しませる）、unterschreiben（署名する）。",
-            "über": "über- は『越えて・過度・支配』を意味する。例: übertreiben（誇張する）、übernehmen（引き受ける）。",
-            "ab": "ab- は『分離・除去・開始・完了』を意味する。例: abfahren（出発する）、abnehmen（減る）。",
-            "er": "er- は『結果・達成・開始・誕生』を表す。例: erreichen（到達する）、erkennen（気づく）。",
-            "vor": "vor- は『前・予防・優先』を表す。例: vorlesen（朗読する）、vorbereiten（準備する）。",
-            "weg": "weg- は『離れる・消える』を表す。例: weggehen（立ち去る）、wegwerfen（捨てる）。",
-            "bei": "bei- は『そばで・関与・助長』を意味する。例: beistehen（助ける）、beibringen（教える）。"
-        };
-        // データを取得し、整形する関数
-        async function fetchData() {
-            try {
-                // GitHub Raw URLから静的なJSONファイルを直接取得します。（高速）
-                const response = await fetch(JSON_URL);
-                if (!response.ok) {
-                    throw new Error(`HTTPエラー: ${response.status} - URLまたはファイル権限を確認してください`);
-                }
-                const data = await response.json(); 
-                
-                // JSONデータから必要な情報を抽出・マッピング
-                allData = data.map(item => ({
-                    // JSONのキー（item.単語など）は、スプレッドシートの1行目のヘッダーと完全に一致させる必要があります。
-                    word: item.単語,
-                    meaning: item.意味,
-                    stem: item.基幹,
-                    prefix: item.接頭辞,
-                    englishTranslation: item.英訳,
-                    prefixMeaning: item.接頭辞基本意味,
-                    nuance: item.語感,
-                    syntax: item.構文,
-                    separability: item.分離性,
-                    conjugation: item.活用,
-                    example1: item.例文1,
-                    japaneseTranslation1: item.日本語訳1,
-                    example2: item.例文2,
-                    japaneseTranslation2: item.日本語訳2,
-                    derivatives: item.派生語,
-                    correspondingEnglish: item.対応英単語
-                }));
-                
-                initializePage();
+      <!-- Sticky接頭辞説明 -->
+      <div
+        id="prefix-explanation"
+        class="sticky top-[72px] z-20 bg-blue-50 border-b border-blue-200 text-center py-2 text-gray-800 text-lg italic hidden">
+      </div>
 
-            } catch (error) {
-                console.error("データの取得中にエラーが発生しました。JSONファイル名、パス、またはJSONの構造を確認してください:", error);
-                document.getElementById('verb-details').innerHTML = `<p class="text-center text-red-600 mt-10 col-span-full">データの読み込みに失敗しました。JSONファイル（verbs.json）のURL、または内部の日本語キー（例: item.単語）が正しいか確認してください。（${error.message}）</p>`;
-            }
-        }
+      <!-- メイン内容 -->
+      <h2 class="text-2xl font-semibold mb-6 text-gray-800 text-center">
+        すべての単語
+      </h2>
 
-        // フィルタリングリスト（接頭辞と基幹）を初期化する
-        // ================================
-        // ページ初期化
-        // ================================
-        function initializePage() {
-            const prefixes = [...new Set(allData.map(item => item.prefix))].filter(Boolean).sort();
-            const stems = [...new Set(allData.map(item => item.stem))].filter(Boolean).sort();
-        
-            renderPrefixList(prefixes);
-            renderStemList(stems);
-            renderVerbDetails(allData);
-        }
-        
-        // ================================
-        // 接頭辞リストのレンダリング
-        // ================================
-        function renderPrefixList(prefixes) {
-            const listElement = document.getElementById('prefix-list');
-            listElement.innerHTML = '';
-        
-            const commonPrefixes = [
-                "ab", "an", "auf", "aus", "be", "bei", "ent", "er", "ver", "zer",
-                "nach", "mit", "über", "unter", "vor", "weg", "zu", "ein", "emp", "fort", "ge", "los", "um", "zurück"
-            ];
-            const frequent = prefixes.filter(p => commonPrefixes.includes(p));
-            const others = prefixes.filter(p => !commonPrefixes.includes(p));
-        
-            // 全て表示リンク
-            const allItem = document.createElement('li');
-            allItem.classList.add('all-item');
-            allItem.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="prefix" class="active">全ての接頭辞</a>`;
-            allItem.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
-            listElement.appendChild(allItem);
-        
-            // 🔹 頻出セクションブロック
-            const freqSection = document.createElement('div');
-            freqSection.classList.add('prefix-section', 'mb-3');
-        
-            const freqHeader = document.createElement('div');
-            freqHeader.classList.add('flex', 'items-center', 'mb-1');
-            freqHeader.innerHTML = `
-                <span class="inline-block bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">頻出</span>
-            `;
-            freqSection.appendChild(freqHeader);
-        
-            const freqList = document.createElement('ul');
-            freqList.classList.add('filter-list');
-            frequent.forEach(p => {
-                const li = document.createElement('li');
-                li.innerHTML = `<a href="#" data-filter-value="${p}" data-filter-type="prefix">${p}</a>`;
-                li.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
-                freqList.appendChild(li);
-            });
-            freqSection.appendChild(freqList);
-            listElement.appendChild(freqSection);
-        
-            // 🔹 その他セクションブロック
-            const otherSection = document.createElement('div');
-            otherSection.classList.add('prefix-section', 'mb-3');
-        
-            const otherHeader = document.createElement('div');
-            otherHeader.classList.add('flex', 'items-center', 'mb-1');
-            otherHeader.innerHTML = `
-                <span class="inline-block bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded">その他</span>
-            `;
-            otherSection.appendChild(otherHeader);
-        
-            const otherList = document.createElement('ul');
-            otherList.classList.add('filter-list');
-            others.forEach(p => {
-                const li = document.createElement('li');
-                li.innerHTML = `<a href="#" data-filter-value="${p}" data-filter-type="prefix">${p}</a>`;
-                li.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
-                otherList.appendChild(li);
-            });
-            otherSection.appendChild(otherList);
-            listElement.appendChild(otherSection);
-        }
+      <div id="verb-details" class="verb-grid">
+        <p class="text-center text-gray-500 mt-10 col-span-full">
+          データを読み込み中です...
+        </p>
+      </div>
+    </main>
+  </div>
 
-        
-        // ================================
-        // 基幹リストのレンダリング
-        // ================================
-        function renderStemList(stems) {
-            const listElement = document.getElementById('stem-list');
-            listElement.innerHTML = '';
-        
-            // 全て表示リンク
-            const allItem = document.createElement('li');
-            allItem.classList.add('all-item');
-            allItem.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="stem" class="active">全ての基幹</a>`;
-            allItem.querySelector('a').addEventListener('click', (e) => filterData(e, 'stem'));
-            listElement.appendChild(allItem);
-        
-            // 頭文字でグループ化
-            const grouped = {};
-            stems.forEach(stem => {
-                const first = stem[0].toUpperCase();
-                if (!grouped[first]) grouped[first] = [];
-                grouped[first].push(stem);
-            });
-        
-            const sortedLetters = Object.keys(grouped).sort();
-        
-            // 見出しごとに独立したブロックを生成
-            sortedLetters.forEach(letter => {
-                const section = document.createElement('div');
-                section.classList.add('stem-section', 'mb-3');
-        
-                const header = document.createElement('div');
-                header.classList.add('flex', 'items-center', 'mb-1');
-                header.innerHTML = `
-                    <span class="inline-block bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">${letter}</span>
-                `;
-                section.appendChild(header);
-        
-                const innerList = document.createElement('ul');
-                innerList.classList.add('filter-list');
-                grouped[letter].forEach(stem => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<a href="#" data-filter-value="${stem}" data-filter-type="stem">${stem}</a>`;
-                    li.querySelector('a').addEventListener('click', (e) => filterData(e, 'stem'));
-                    innerList.appendChild(li);
-                });
-                section.appendChild(innerList);
-                listElement.appendChild(section);
-            });
-        }
+  <script>
+    const JSON_URL =
+      'https://raw.githubusercontent.com/SallyYamamoto/Prefix_German/refs/heads/main/verbs.json';
+    let allData = [];
 
+    const prefixExplanations = {
+      be: 'be- は動詞を他動詞化し、対象への働きかけを表す。例: befragen（質問する）、bemalen（塗る）。',
+      ent: 'ent- は『離れる』『取り除く』『反対の動作』を意味する。例: entkommen（逃れる）、entfernen（取り除く）。',
+      ver: 'ver- は『間違い・変化・消滅』などを表す。例: verlieren（失う）、verändern（変化させる）。',
+      zer: 'zer- は『分解・破壊・分裂』を意味する。例: zerreißen（引き裂く）。',
+      auf: 'auf- は『上昇・開始・開放』を意味する。例: aufstehen（起きる）、aufmachen（開ける）。',
+      an: 'an- は『接近・開始・関与』を表す。例: anfangen（始める）、anrufen（電話する）。',
+      aus: 'aus- は『外への動き・完了・結果』を表す。例: ausgehen（出かける）、ausruhen（休む）。',
+      nach: 'nach- は『後に続く・模倣・再現』を意味する。例: nachmachen（まねる）、nachfragen（問い合わせる）。',
+      mit: 'mit- は『共に・一緒に』を意味する。例: mitnehmen（持って行く）、mitarbeiten（協力する）。',
+      unter:
+        'unter- は『下・補助・不足・秘密裏』など多義的。例: unterhalten（楽しませる）、unterschreiben（署名する）。',
+      über:
+        'über- は『越えて・過度・支配』を意味する。例: übertreiben（誇張する）、übernehmen（引き受ける）。',
+      ab: 'ab- は『分離・除去・開始・完了』を意味する。例: abfahren（出発する）、abnehmen（減る）。',
+      er: 'er- は『結果・達成・開始・誕生』を表す。例: erreichen（到達する）、erkennen（気づく）。',
+      vor: 'vor- は『前・予防・優先』を表す。例: vorlesen（朗読する）、vorbereiten（準備する）。',
+      weg: 'weg- は『離れる・消える』を表す。例: weggehen（立ち去る）、wegwerfen（捨てる）。',
+      bei: 'bei- は『そばで・関与・助長』を意味する。例: beistehen（助ける）、beibringen（教える）。'
+    };
 
+    async function fetchData() {
+      try {
+        const response = await fetch(JSON_URL);
+        if (!response.ok) throw new Error(`HTTPエラー: ${response.status}`);
+        const data = await response.json();
+        allData = data.map((item) => ({
+          word: item.単語,
+          meaning: item.意味,
+          stem: item.基幹,
+          prefix: item.接頭辞,
+          englishTranslation: item.英訳,
+          prefixMeaning: item.接頭辞基本意味,
+          nuance: item.語感,
+          syntax: item.構文,
+          separability: item.分離性,
+          conjugation: item.活用,
+          example1: item.例文1,
+          japaneseTranslation1: item.日本語訳1,
+          example2: item.例文2,
+          japaneseTranslation2: item.日本語訳2,
+          derivatives: item.派生語,
+          correspondingEnglish: item.対応英単語
+        }));
+        initializePage();
+      } catch (err) {
+        console.error('Error:', err);
+      }
+    }
 
-        // フィルタリングを実行し、結果をメインコンテンツに表示する
-        function filterData(e, type) {
-            e.preventDefault();
-            const filterValue = e.target.getAttribute('data-filter-value');
-        
-            let filteredData;
-            const headingElement = document.getElementById('main-content').querySelector('h2');
-        
-            // フィルタ処理
-            if (filterValue === 'all') {
-                filteredData = allData;
-                headingElement.innerHTML = `<span class="text-gray-500 text-2xl font-semibold">すべての単語</span>`;
-            } else if (type === 'prefix') {
-                filteredData = allData.filter(item => item.prefix && item.prefix === filterValue);
-                headingElement.innerHTML = `
-                    <div class="text-center mt-2 mb-6">
-                        <span class="inline-block text-4xl font-bold text-blue-700 tracking-wide">${filterValue}-</span>
-                    </div>
-                `;
-            } else if (type === 'stem') {
-                filteredData = allData.filter(item => item.stem && item.stem === filterValue);
-                headingElement.innerHTML = `
-                    <div class="text-center mt-2 mb-6">
-                        <span class="inline-block text-4xl font-bold text-green-700 tracking-wide">-${filterValue}</span>
-                    </div>
-                `;
-            }
-        
-            renderVerbDetails(filteredData);
-        
-            // ハイライト
-            document.querySelectorAll('.filter-list a').forEach(a => a.classList.remove('active'));
-            e.target.classList.add('active');
-        }
+    function initializePage() {
+      const prefixes = [...new Set(allData.map((i) => i.prefix))].filter(Boolean).sort();
+      const stems = [...new Set(allData.map((i) => i.stem))].filter(Boolean).sort();
+      renderPrefixList(prefixes);
+      renderStemList(stems);
+      renderVerbDetails(allData);
+    }
 
+    function renderPrefixList(prefixes) {
+      const el = document.getElementById('prefix-list');
+      el.innerHTML = '';
+      const common = ['ab', 'an', 'auf', 'aus', 'be', 'bei', 'ent', 'er', 'ver', 'zer', 'nach', 'mit', 'über', 'unter', 'vor', 'weg'];
+      const freq = prefixes.filter((p) => common.includes(p));
+      const other = prefixes.filter((p) => !common.includes(p));
+      const section = (title, items, color) => {
+        const div = document.createElement('div');
+        div.classList.add('mb-3');
+        div.innerHTML = `
+          <div class="flex items-center mb-1">
+            <span class="inline-block ${color} font-semibold px-2 py-0.5 rounded">${title}</span>
+          </div>
+        `;
+        const ul = document.createElement('ul');
+        ul.classList.add('filter-list');
+        items.forEach((p) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="#" data-filter-value="${p}" data-filter-type="prefix">${p}</a>`;
+          li.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
+          ul.appendChild(li);
+        });
+        div.appendChild(ul);
+        return div;
+      };
+      const all = document.createElement('li');
+      all.classList.add('all-item');
+      all.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="prefix" class="active">全ての接頭辞</a>`;
+      all.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
+      el.appendChild(all);
+      el.appendChild(section('頻出', freq, 'bg-blue-100 text-blue-700'));
+      el.appendChild(section('その他', other, 'bg-gray-100 text-gray-700'));
+    }
 
+    function renderStemList(stems) {
+      const el = document.getElementById('stem-list');
+      el.innerHTML = '';
+      const all = document.createElement('li');
+      all.classList.add('all-item');
+      all.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="stem" class="active">全ての基幹</a>`;
+      all.querySelector('a').addEventListener('click', (e) => filterData(e, 'stem'));
+      el.appendChild(all);
+      const grouped = {};
+      stems.forEach((s) => {
+        const f = s[0].toUpperCase();
+        if (!grouped[f]) grouped[f] = [];
+        grouped[f].push(s);
+      });
+      Object.keys(grouped)
+        .sort()
+        .forEach((l) => {
+          const div = document.createElement('div');
+          div.classList.add('mb-3');
+          div.innerHTML = `
+            <div class="flex items-center mb-1">
+              <span class="inline-block bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">${l}</span>
+            </div>`;
+          const ul = document.createElement('ul');
+          ul.classList.add('filter-list');
+          grouped[l].forEach((s) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="#" data-filter-value="${s}" data-filter-type="stem">${s}</a>`;
+            li.querySelector('a').addEventListener('click', (e) => filterData(e, 'stem'));
+            ul.appendChild(li);
+          });
+          div.appendChild(ul);
+          el.appendChild(div);
+        });
+    }
 
-        // 動詞の詳細リストをHTMLに描画する (デザイン反映済み)
-        function renderVerbDetails(data) {
-            const detailsElement = document.getElementById('verb-details');
-            detailsElement.innerHTML = ''; 
-            
-            if (data.length === 0) {
-                detailsElement.innerHTML = '<p class="text-center text-gray-500 mt-10 col-span-full">該当する単語は見つかりませんでした。</p>';
-                return;
-            }
+    function filterData(e, type) {
+      e.preventDefault();
+      const val = e.target.getAttribute('data-filter-value');
+      const cf = document.getElementById('current-filter');
+      const pe = document.getElementById('prefix-explanation');
+      let filtered = [];
+      if (val === 'all') {
+        filtered = allData;
+        cf.classList.add('hidden');
+        pe.classList.add('hidden');
+      } else if (type === 'prefix') {
+        filtered = allData.filter((i) => i.prefix === val);
+        cf.innerHTML = `<span class="text-5xl font-extrabold text-blue-700 tracking-wide">${val}-</span>`;
+        cf.classList.remove('hidden');
+        if (prefixExplanations[val]) {
+          pe.innerHTML = prefixExplanations[val];
+          pe.classList.remove('hidden');
+        } else pe.classList.add('hidden');
+      } else if (type === 'stem') {
+        filtered = allData.filter((i) => i.stem === val);
+        cf.innerHTML = `<span class="text-5xl font-extrabold text-green-700 tracking-wide">-${val}</span>`;
+        cf.classList.remove('hidden');
+        pe.classList.add('hidden');
+      }
+      renderVerbDetails(filtered);
+      document.querySelectorAll('.filter-list a').forEach((a) => a.classList.remove('active'));
+      e.target.classList.add('active');
+    }
 
-            data.forEach(item => {
-                const verbCard = document.createElement('div');
-                verbCard.classList.add('verb-card');
-                
-                // 例文 2 の HTML を安全に生成
-                let example2Html = '';
-                if (item.example2 && String(item.example2).trim().length > 0) {
-                    example2Html = `
-                        <div class="example-box">
-                            <div class="vertical-line"></div>
-                            <div class="example-content">
-                                <p class="german-sentence">${item.example2}</p>
-                                <p class="japanese-translation">（${item.japaneseTranslation2 || '---'}）</p>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                // 派生語と対応英単語のHTMLを生成
-                const relatedHtml = `
-                    <div class="related-section">
-                        ${(item.derivatives && String(item.derivatives).trim().length > 0) ? `
-                            <div class="related-item">
-                                <span class="icon">🔗</span>
-                                <span class="detail-label">派生語:</span>
-                                <span class="german-term">${item.derivatives}</span>
-                            </div>
-                        ` : ''}
-                        
-                        ${(item.correspondingEnglish && String(item.correspondingEnglish).trim().length > 0) ? `
-                            <div class="related-item">
-                                <span class="icon">🇬🇧</span>
-                                <span class="detail-label">類似英単語:</span>
-                                <span class="highlight-detail">${item.correspondingEnglish}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+    function renderVerbDetails(data) {
+      const el = document.getElementById('verb-details');
+      el.innerHTML = '';
+      if (!data.length) {
+        el.innerHTML = `<p class="text-center text-gray-500 mt-10 col-span-full">該当する単語は見つかりませんでした。</p>`;
+        return;
+      }
+      data.forEach((item) => {
+        const div = document.createElement('div');
+        div.classList.add('verb-card');
+        div.innerHTML = `
+          <div class="card-header mb-2">
+            <h3 class="text-2xl font-semibold">${item.word}</h3>
+            <div class="etymology text-blue-500 italic">${item.prefix || '---'} + ${item.stem || '---'}</div>
+          </div>
+          <div class="meaning-jp text-lg font-bold mb-1">${item.meaning}</div>
+          <div class="meaning-en text-sm italic text-gray-600 mb-3">(${item.englishTranslation || '---'})</div>
+        `;
+        el.appendChild(div);
+      });
+    }
 
-                // 全ての項目を新しいデザイン構造に埋め込む
-                verbCard.innerHTML = `
-                    <div class="card-header">
-                        <h3>${item.word}</h3>
-                        <div class="etymology">${item.prefix || '---'} + ${item.stem || '---'}</div>
-                    </div>
-
-                    <div class="meaning-jp">${item.meaning}</div>
-                    <div class="meaning-en">(${item.englishTranslation || '---'})</div>
-
-                    <div class="detail-section">
-                        <div class="detail-item">
-                            <span class="detail-label">構成:</span>
-                            <span class="detail-value highlight-detail">
-                                ${item.prefix || '---'}
-                                ${(item.prefixMeaning && String(item.prefixMeaning).trim().length > 0) 
-                                    ? `（${item.prefixMeaning}）` 
-                                    : ''
-                                }
-                                + ${item.stem || '---'}
-                            </span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">分離性:</span>
-                            <span class="detail-value">${item.separability || '---'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">語感:</span>
-                            <span class="detail-value">${item.nuance || '---'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">構文:</span>
-                            <span class="detail-value"><span class="german-term">${item.syntax || '---'}</span></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">活用:</span>
-                            <span class="detail-value"><span class="german-term">${item.conjugation || '---'}</span></span>
-                        </div>
-                    </div>
-
-                    <div class="example-section">
-                        <h4 class="text-lg font-medium mb-3 text-gray-700">例文</h4>
-                        <div class="example-box">
-                            <div class="vertical-line"></div>
-                            <div class="example-content">
-                                <p class="german-sentence">${item.example1 || '---'}</p>
-                                <p class="japanese-translation">（${item.japaneseTranslation1 || '---'}）</p>
-                            </div>
-                        </div>
-                        ${example2Html}
-                    </div>
-                    
-                    ${relatedHtml}
-                `;
-                detailsElement.appendChild(verbCard);
-            });
-        }
-
-        // ページのロード時にデータ取得を開始
-        fetchData();
-    </script>
+    fetchData();
+  </script>
 </body>
 </html>
