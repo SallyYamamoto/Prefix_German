@@ -352,7 +352,10 @@
             const listElement = document.getElementById('prefix-list');
             listElement.innerHTML = '';
         
-            const commonPrefixes = ["ab", "an", "auf", "aus", "be", "bei", "ent", "er", "ver", "zer", "nach", "mit", "über", "unter", "vor", "weg"];
+            const commonPrefixes = [
+                "ab", "an", "auf", "aus", "be", "bei", "ent", "er", "ver", "zer",
+                "nach", "mit", "über", "unter", "vor", "weg"
+            ];
             const frequent = prefixes.filter(p => commonPrefixes.includes(p));
             const others = prefixes.filter(p => !commonPrefixes.includes(p));
         
@@ -363,30 +366,51 @@
             allItem.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
             listElement.appendChild(allItem);
         
-            // サブセクション: 頻出
-            const freqTitle = document.createElement('li');
-            freqTitle.innerHTML = `<div class="text-blue-600 font-semibold mt-3 mb-1">頻出</div>`;
-            listElement.appendChild(freqTitle);
+            // 🔹 頻出セクションブロック
+            const freqSection = document.createElement('div');
+            freqSection.classList.add('prefix-section', 'mb-3');
         
+            const freqHeader = document.createElement('div');
+            freqHeader.classList.add('flex', 'items-center', 'mb-1');
+            freqHeader.innerHTML = `
+                <span class="inline-block bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">頻出</span>
+            `;
+            freqSection.appendChild(freqHeader);
+        
+            const freqList = document.createElement('ul');
+            freqList.classList.add('filter-list');
             frequent.forEach(p => {
                 const li = document.createElement('li');
                 li.innerHTML = `<a href="#" data-filter-value="${p}" data-filter-type="prefix">${p}</a>`;
                 li.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
-                listElement.appendChild(li);
+                freqList.appendChild(li);
             });
+            freqSection.appendChild(freqList);
+            listElement.appendChild(freqSection);
         
-            // サブセクション: その他
-            const otherTitle = document.createElement('li');
-            otherTitle.innerHTML = `<div class="text-gray-600 font-semibold mt-3 mb-1">その他</div>`;
-            listElement.appendChild(otherTitle);
+            // 🔹 その他セクションブロック
+            const otherSection = document.createElement('div');
+            otherSection.classList.add('prefix-section', 'mb-3');
         
+            const otherHeader = document.createElement('div');
+            otherHeader.classList.add('flex', 'items-center', 'mb-1');
+            otherHeader.innerHTML = `
+                <span class="inline-block bg-gray-100 text-gray-700 font-semibold px-2 py-0.5 rounded">その他</span>
+            `;
+            otherSection.appendChild(otherHeader);
+        
+            const otherList = document.createElement('ul');
+            otherList.classList.add('filter-list');
             others.forEach(p => {
                 const li = document.createElement('li');
                 li.innerHTML = `<a href="#" data-filter-value="${p}" data-filter-type="prefix">${p}</a>`;
                 li.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
-                listElement.appendChild(li);
+                otherList.appendChild(li);
             });
+            otherSection.appendChild(otherList);
+            listElement.appendChild(otherSection);
         }
+
         
         // ================================
         // 基幹リストのレンダリング
