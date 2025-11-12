@@ -259,6 +259,7 @@
         <!-- メインコンテンツ (単語詳細) -->
         <main id="main-content" class="lg:col-span-3">
             <h2 class="text-2xl font-semibold mb-6 text-gray-800">単語一覧（接頭辞：全て）</h2>
+            <div id="prefix-description" class="mb-6 text-gray-600 text-sm italic"></div>
             <div id="verb-details" class="verb-grid">
                 <p class="text-center text-gray-500 mt-10 col-span-full">データを読み込み中です...</p>
             </div>
@@ -273,7 +274,25 @@
         // **データソースURL**: GitHubのRawファイルURLを設定
         const JSON_URL = 'https://raw.githubusercontent.com/SallyYamamoto/Prefix_German/refs/heads/main/verbs.json';
         let allData = []; // 全データを保持するグローバル変数
-
+        // 接頭辞の意味説明マップ
+        const prefixExplanations = {
+            "be": "be- は動詞を他動詞化し、対象への働きかけを表す。例: befragen（質問する）、bemalen（塗る）。",
+            "ent": "ent- は『離れる』『取り除く』『反対の動作』を意味する。例: entkommen（逃れる）、entfernen（取り除く）。",
+            "ver": "ver- は『間違い・変化・消滅』などを表す。例: verlieren（失う）、verändern（変化させる）。",
+            "zer": "zer- は『分解・破壊・分裂』を意味する。例: zerreißen（引き裂く）。",
+            "auf": "auf- は『上昇・開始・開放』を意味する。例: aufstehen（起きる）、aufmachen（開ける）。",
+            "an": "an- は『接近・開始・関与』を表す。例: anfangen（始める）、anrufen（電話する）。",
+            "aus": "aus- は『外への動き・完了・結果』を表す。例: ausgehen（出かける）、ausruhen（休む）。",
+            "nach": "nach- は『後に続く・模倣・再現』を意味する。例: nachmachen（まねる）、nachfragen（問い合わせる）。",
+            "mit": "mit- は『共に・一緒に』を意味する。例: mitnehmen（持って行く）、mitarbeiten（協力する）。",
+            "unter": "unter- は『下・補助・不足・秘密裏』など多義的。例: unterhalten（楽しませる）、unterschreiben（署名する）。",
+            "über": "über- は『越えて・過度・支配』を意味する。例: übertreiben（誇張する）、übernehmen（引き受ける）。",
+            "ab": "ab- は『分離・除去・開始・完了』を意味する。例: abfahren（出発する）、abnehmen（減る）。",
+            "er": "er- は『結果・達成・開始・誕生』を表す。例: erreichen（到達する）、erkennen（気づく）。",
+            "vor": "vor- は『前・予防・優先』を表す。例: vorlesen（朗読する）、vorbereiten（準備する）。",
+            "weg": "weg- は『離れる・消える』を表す。例: weggehen（立ち去る）、wegwerfen（捨てる）。",
+            "bei": "bei- は『そばで・関与・助長』を意味する。例: beistehen（助ける）、beibringen（教える）。"
+        };
         // データを取得し、整形する関数
         async function fetchData() {
             try {
@@ -393,50 +412,62 @@
         
             const sortedLetters = Object.keys(grouped).sort();
         
+            // 見出しごとに独立したブロックを生成
             sortedLetters.forEach(letter => {
-                const section = document.createElement('li');
-                section.innerHTML = `<div class="flex items-center mt-3 mb-1">
-                    <span class="inline-block bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">${letter}</span>
-                </div>`;
-                listElement.appendChild(section);
+                const section = document.createElement('div');
+                section.classList.add('stem-section', 'mb-3');
         
+                const header = document.createElement('div');
+                header.classList.add('flex', 'items-center', 'mb-1');
+                header.innerHTML = `
+                    <span class="inline-block bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">${letter}</span>
+                `;
+                section.appendChild(header);
+        
+                const innerList = document.createElement('ul');
+                innerList.classList.add('filter-list');
                 grouped[letter].forEach(stem => {
                     const li = document.createElement('li');
                     li.innerHTML = `<a href="#" data-filter-value="${stem}" data-filter-type="stem">${stem}</a>`;
                     li.querySelector('a').addEventListener('click', (e) => filterData(e, 'stem'));
-                    listElement.appendChild(li);
+                    innerList.appendChild(li);
                 });
+                section.appendChild(innerList);
+                listElement.appendChild(section);
             });
         }
+
 
 
         // フィルタリングを実行し、結果をメインコンテンツに表示する
         function filterData(e, type) {
             e.preventDefault(); 
             const filterValue = e.target.getAttribute('data-filter-value');
-            
-            let filteredData;
+            const descElement = document.getElementById('prefix-description');
             const headingElement = document.getElementById('main-content').querySelector('h2');
-            
+            let filteredData;
+        
             if (filterValue === 'all') {
                 filteredData = allData;
                 headingElement.textContent = `単語一覧（${type === 'prefix' ? '接頭辞' : '基幹'}：全て）`;
+                descElement.textContent = ""; // 説明をクリア
             } else if (type === 'prefix') {
-                // フィルタリング時に、nullや空文字列のデータも除外して絞り込む
                 filteredData = allData.filter(item => item.prefix && item.prefix === filterValue);
                 headingElement.textContent = `単語一覧（接頭辞：${filterValue}）`;
+                // 接頭辞の説明を表示
+                descElement.textContent = prefixExplanations[filterValue] || "";
             } else if (type === 'stem') {
-                // フィルタリング時に、nullや空文字列のデータも除外して絞り込む
                 filteredData = allData.filter(item => item.stem && item.stem === filterValue);
                 headingElement.textContent = `単語一覧（基幹：${filterValue}）`;
+                descElement.textContent = ""; // 接頭辞説明は非表示
             }
-            
+        
             renderVerbDetails(filteredData);
-            
-            // ハイライト処理
+        
             document.querySelectorAll('.filter-list a').forEach(a => a.classList.remove('active'));
             e.target.classList.add('active');
         }
+
 
         // 動詞の詳細リストをHTMLに描画する (デザイン反映済み)
         function renderVerbDetails(data) {
