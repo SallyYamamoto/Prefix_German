@@ -52,3 +52,12 @@ body {
     border-radius: 5px;
     background-color: white;
 }
+
+.stem-section {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+
+.stem-section:last-child {
+  border-bottom: none;
+}
