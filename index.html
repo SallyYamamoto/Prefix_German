@@ -243,6 +243,43 @@
             font-style: italic;
         }
 
+        /* 🔹 折りたたみ式 Stem セクション */
+        .stem-section {
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background-color: #fafafa;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        
+        .stem-section-header {
+            cursor: pointer;
+            user-select: none;
+            padding: 6px 10px;
+            font-weight: 600;
+            color: #0056b3;
+            background-color: #f0f7ff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stem-section-header:hover {
+            background-color: #e6f0ff;
+        }
+        
+        .stem-section ul {
+            padding: 8px 12px;
+            display: none; /* デフォルトで非表示 */
+        }
+        
+        .stem-section.open ul {
+            display: flex; /* 開いた状態で表示 */
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
     </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
@@ -456,17 +493,24 @@
         
             const sortedLetters = Object.keys(grouped).sort();
         
-            // 見出しごとに独立したブロックを生成
+            // 各アルファベットグループを作成
             sortedLetters.forEach(letter => {
                 const section = document.createElement('div');
-                section.classList.add('stem-section', 'mb-3');
+                section.classList.add('stem-section', 'mb-2');
         
                 const header = document.createElement('div');
-                header.classList.add('flex', 'items-center', 'mb-1');
+                header.classList.add('stem-section-header');
                 header.innerHTML = `
-                    <span class="inline-block bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">${letter}</span>
+                    <span>${letter}</span>
+                    <span class="toggle-icon text-gray-500">＋</span>
                 `;
-                section.appendChild(header);
+        
+                // 開閉イベント
+                header.addEventListener('click', () => {
+                    section.classList.toggle('open');
+                    const icon = header.querySelector('.toggle-icon');
+                    icon.textContent = section.classList.contains('open') ? '−' : '＋';
+                });
         
                 const innerList = document.createElement('ul');
                 innerList.classList.add('filter-list');
@@ -476,6 +520,8 @@
                     li.querySelector('a').addEventListener('click', (e) => filterData(e, 'stem'));
                     innerList.appendChild(li);
                 });
+        
+                section.appendChild(header);
                 section.appendChild(innerList);
                 listElement.appendChild(section);
             });
