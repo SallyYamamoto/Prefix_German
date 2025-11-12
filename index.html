@@ -314,42 +314,101 @@
         }
 
         // フィルタリングリスト（接頭辞と基幹）を初期化する
+        // ================================
+        // ページ初期化
+        // ================================
         function initializePage() {
-            // 固有の接頭辞と基幹のリストを作成
-            const prefixes = [...new Set(allData.map(item => item.prefix))].sort();
-            const stems = [...new Set(allData.map(item => item.stem))].sort();
-
-            renderFilterList('prefix-list', prefixes, 'prefix');
-            renderFilterList('stem-list', stems, 'stem');
-
-            // 初期表示として全動詞を表示
+            const prefixes = [...new Set(allData.map(item => item.prefix))].filter(Boolean).sort();
+            const stems = [...new Set(allData.map(item => item.stem))].filter(Boolean).sort();
+        
+            renderPrefixList(prefixes);
+            renderStemList(stems);
             renderVerbDetails(allData);
         }
-
-        // フィルタリングリスト（UL要素）をHTMLに描画する
-        function renderFilterList(elementId, items, type) {
-            const listElement = document.getElementById(elementId);
+        
+        // ================================
+        // 接頭辞リストのレンダリング
+        // ================================
+        function renderPrefixList(prefixes) {
+            const listElement = document.getElementById('prefix-list');
             listElement.innerHTML = '';
-            
-            // 1. 全て表示リンクを追加 (all-itemクラスでスラッシュ区切りから除外)
+        
+            const commonPrefixes = ["ab", "an", "auf", "aus", "be", "bei", "ent", "er", "ver", "zer", "nach", "mit", "über", "unter", "vor", "weg"];
+            const frequent = prefixes.filter(p => commonPrefixes.includes(p));
+            const others = prefixes.filter(p => !commonPrefixes.includes(p));
+        
+            // 全て表示リンク
             const allItem = document.createElement('li');
             allItem.classList.add('all-item');
-            const allText = type === 'prefix' ? '全ての接頭辞' : '全ての基幹';
-            allItem.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="${type}" class="active">**${allText}**</a>`;
-            allItem.querySelector('a').addEventListener('click', (e) => filterData(e, type));
+            allItem.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="prefix" class="active">全ての接頭辞</a>`;
+            allItem.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
             listElement.appendChild(allItem);
-            
-            // 2. 各接頭辞/基幹のリンクを追加
-            items.forEach(item => {
-                // itemがnullや空文字列、または純粋な空白のみの場合はスキップ
-                if (!item || String(item).trim().length === 0) return;
-                
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `<a href="#" data-filter-value="${item}" data-filter-type="${type}">${item}</a>`;
-                listItem.querySelector('a').addEventListener('click', (e) => filterData(e, type));
-                listElement.appendChild(listItem);
+        
+            // サブセクション: 頻出
+            const freqTitle = document.createElement('li');
+            freqTitle.innerHTML = `<div class="text-blue-600 font-semibold mt-3 mb-1">頻出</div>`;
+            listElement.appendChild(freqTitle);
+        
+            frequent.forEach(p => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="#" data-filter-value="${p}" data-filter-type="prefix">${p}</a>`;
+                li.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
+                listElement.appendChild(li);
+            });
+        
+            // サブセクション: その他
+            const otherTitle = document.createElement('li');
+            otherTitle.innerHTML = `<div class="text-gray-600 font-semibold mt-3 mb-1">その他</div>`;
+            listElement.appendChild(otherTitle);
+        
+            others.forEach(p => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="#" data-filter-value="${p}" data-filter-type="prefix">${p}</a>`;
+                li.querySelector('a').addEventListener('click', (e) => filterData(e, 'prefix'));
+                listElement.appendChild(li);
             });
         }
+        
+        // ================================
+        // 基幹リストのレンダリング
+        // ================================
+        function renderStemList(stems) {
+            const listElement = document.getElementById('stem-list');
+            listElement.innerHTML = '';
+        
+            // 全て表示リンク
+            const allItem = document.createElement('li');
+            allItem.classList.add('all-item');
+            allItem.innerHTML = `<a href="#" data-filter-value="all" data-filter-type="stem" class="active">全ての基幹</a>`;
+            allItem.querySelector('a').addEventListener('click', (e) => filterData(e, 'stem'));
+            listElement.appendChild(allItem);
+        
+            // 頭文字でグループ化
+            const grouped = {};
+            stems.forEach(stem => {
+                const first = stem[0].toUpperCase();
+                if (!grouped[first]) grouped[first] = [];
+                grouped[first].push(stem);
+            });
+        
+            const sortedLetters = Object.keys(grouped).sort();
+        
+            sortedLetters.forEach(letter => {
+                const section = document.createElement('li');
+                section.innerHTML = `<div class="flex items-center mt-3 mb-1">
+                    <span class="inline-block bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">${letter}</span>
+                </div>`;
+                listElement.appendChild(section);
+        
+                grouped[letter].forEach(stem => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="#" data-filter-value="${stem}" data-filter-type="stem">${stem}</a>`;
+                    li.querySelector('a').addEventListener('click', (e) => filterData(e, 'stem'));
+                    listElement.appendChild(li);
+                });
+            });
+        }
+
 
         // フィルタリングを実行し、結果をメインコンテンツに表示する
         function filterData(e, type) {
